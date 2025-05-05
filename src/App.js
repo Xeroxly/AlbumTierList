@@ -19,6 +19,9 @@ const spotify = new SpotifyWebApi();
 
 // TO DO:
 // Need to add tier list creation/editing functionality
+// Need to add ability to save tier lists to Database
+// Need to add ability to search for other user's tier lists and display them
+// Need to add ability for login to persist accross refreshses
 // Need to impove look of the page
 
 function App() {
