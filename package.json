@@ -10,6 +10,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-scripts": "5.0.1",
+    "react-spotify-web-playback": "^0.14.7",
+    "spotify-web-api-js": "^1.5.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
