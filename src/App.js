@@ -99,43 +99,43 @@ function App() {
     }
   };
 
+  let handleSubmitSearch = (e) => {
+    e.preventDefault();
+    spotify.searchAlbums(searchCriteria, (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        setSearchResults(result.albums.items);
+        setAlbumTracklist({});
+      }
+    });
+  };
+
+  let handleAlbumClick = (album) => {
+    spotify.getAlbum(album.id, (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        setAlbumTracklist(result.tracks.items);
+        setSearchResults([album]);
+      }
+    });
+  };
+
+  let handleSongPlay = (song) => {
+    spotify.queue(song.uri, () => {
+      spotify.skipToNext();
+    });
+  };
+
   // allows the user to search spotify for albums and displays those results, also allows those albums's tracklist to be shown and played
   let renderAlbumSearch = () => {
-    let handleSubmit = (e) => {
-      e.preventDefault();
-      spotify.searchAlbums(searchCriteria, (err, result) => {
-        if (err) {
-          console.log(err);
-        } else {
-          setSearchResults(result.albums.items);
-          setAlbumTracklist({});
-        }
-      });
-    };
-
-    let handleAlbumClick = (album) => {
-      spotify.getAlbum(album.id, (err, result) => {
-        if (err) {
-          console.log(err);
-        } else {
-          setAlbumTracklist(result.tracks.items);
-          setSearchResults([album]);
-        }
-      });
-    };
-
-    let handleSongPlay = (song) => {
-      spotify.queue(song.uri, () => {
-        spotify.skipToNext();
-      });
-    };
-
     let albumListPadding = searchResults.length === 1 ? "0px" : "80px";
 
     return (
       <div>
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitSearch}
           style={{ outline: "3px solid black", outlineOffset: "15px" }}
         >
           <FormControl
