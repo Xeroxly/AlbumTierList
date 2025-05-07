@@ -1,6 +1,18 @@
 import SpotifyWebApi from "spotify-web-api-js";
 import SpotifyPlayer from "react-spotify-web-playback";
-
+import {
+  AppBar,
+  Avatar,
+  Box,
+  FormControl,
+  Toolbar,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+} from "@mui/material";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { useState, useEffect } from "react";
 import {
   loginUrl,
@@ -14,7 +26,7 @@ const spotify = new SpotifyWebApi();
 // DONE:
 // Added Spotify Authentication
 // Added in app playback controls
-// Need ability to search for songs/albums/artists and display the results
+// Need ability to search for albums and display the results
 // Make search results clickable and onclick display tracklist with ability to play those songs
 
 // TO DO:
@@ -22,7 +34,8 @@ const spotify = new SpotifyWebApi();
 // Need to add ability to save tier lists to Database
 // Need to add ability to search for other user's tier lists and display them
 // Need to add ability for login to persist accross refreshses
-// Need to impove look of the page
+// Need to impove look of the non-logged in page
+// Need to implement right half/left half layout with tier list and album search respectively
 
 function App() {
   const [spotifyToken, setSpotifyToken] = useState("");
@@ -49,8 +62,21 @@ function App() {
   let renderProfile = () => {
     if (JSON.stringify(profileInfo) !== "{}") {
       return (
-        <div>
-          <div style={{ display: "inline" }}>
+        <AppBar style={{ backgroundColor: "black" }}>
+          <Toolbar>
+            <Typography
+              variant="h6"
+              component="div"
+              style={{ paddingRight: "10px" }}
+            >
+              Signed in as: {profileInfo.display_name}
+            </Typography>
+            <Avatar
+              src={profileInfo.images[0].url}
+              alt="profilePic"
+              sx={{ width: 60, height: 60, margin: 0.5 }}
+            />
+            <Box sx={{ flexGrow: 2 }} />
             <a
               style={spotifyStyle}
               href={"http://localhost:3000/"}
@@ -58,19 +84,11 @@ function App() {
             >
               Sign Out
             </a>
-          </div>
-          <h2 style={{ display: "inline" }}>
-            Signed in as: {profileInfo.display_name}
-            {"  "}
-          </h2>
-          <img
-            src={profileInfo.images[0].url}
-            alt="profilePic"
-            style={{ height: "100px", width: "100px" }}
-          />
-        </div>
+          </Toolbar>
+        </AppBar>
       );
     } else {
+      // Not logged in page needs work visually
       return (
         <div>
           <a style={spotifyStyle} href={loginUrl} id="signInButton">
@@ -82,7 +100,6 @@ function App() {
   };
 
   // allows the user to search spotify for albums and displays those results, also allows those albums's tracklist to be shown and played
-  // NEEDS BREAKUP INTO MULTIPLE FUNCTIONS (ORGANIZATION)
   let renderAlbumSearch = () => {
     let handleSubmit = (e) => {
       e.preventDefault();
@@ -102,7 +119,7 @@ function App() {
           console.log(err);
         } else {
           setAlbumTracklist(result.tracks.items);
-          setSearchResults({});
+          setSearchResults([album]);
         }
       });
     };
@@ -113,92 +130,116 @@ function App() {
       });
     };
 
+    let albumListPadding = searchResults.length === 1 ? "0px" : "80px";
+
     return (
       <div>
-        <form onSubmit={handleSubmit}>
-          <label>Search for an Album: </label>
-          <input
-            type="text"
-            value={searchCriteria}
-            onChange={(e) => setSearchCriteria(e.target.value)}
-          />
-          <button type="submit">Search</button>
+        <form
+          onSubmit={handleSubmit}
+          style={{ outline: "3px solid black", outlineOffset: "15px" }}
+        >
+          <FormControl
+            sx={{
+              width: "50%",
+              paddingLeft: "25%",
+              paddingTop: "15px",
+            }}
+          >
+            <input
+              type="text"
+              value={searchCriteria}
+              onChange={(e) => setSearchCriteria(e.target.value)}
+              placeholder="Search for an Album"
+              style={{
+                borderRadius: "20px",
+                paddingLeft: "10px",
+                border: "2px solid black",
+                height: "25px",
+              }}
+            />
+          </FormControl>
         </form>
         <br />
         <div>
-          {searchResults.length
-            ? searchResults.map((album) => {
+          {searchResults.length ? (
+            <List
+              sx={{
+                width: "100%",
+                paddingTop: "0px",
+                paddingBottom: albumListPadding,
+              }}
+            >
+              {searchResults.map((album, i) => {
+                let bgcolor = i % 2 === 0 ? "#444" : "#333";
                 return (
-                  <div key={album.id}>
+                  <ListItem key={album.id} style={{ backgroundColor: bgcolor }}>
                     <input
                       type="image"
                       alt={album.name}
                       src={album.images[0].url}
-                      height={"150px"}
-                      width={"150px"}
-                      onClick={(e, a) => handleAlbumClick(album)}
+                      height={"100px"}
+                      width={"100px"}
+                      onClick={(a) => handleAlbumClick(album)}
                     />
                     {"  "}
-                    <h2 style={{ display: "inline" }}>{album.name}</h2>
+                    <ListItemText
+                      style={{
+                        display: "inline",
+                        color: "white",
+                        paddingLeft: "10px",
+                      }}
+                    >
+                      {album.name}
+                    </ListItemText>
                     <br />
-                  </div>
+                  </ListItem>
                 );
-              })
-            : null}
-          {albumTracklist.length
-            ? albumTracklist.map((song) => {
+              })}
+            </List>
+          ) : null}
+          {albumTracklist.length ? (
+            <List
+              sx={{ width: "100%", paddingTop: "0px", paddingBottom: "80px" }}
+            >
+              {albumTracklist.map((song, i) => {
+                let bgcolor = i % 2 === 0 ? "#333" : "#444";
                 return (
-                  <div key={song.name}>
-                    <h3 style={{ display: "inline" }}>{song.name} </h3>
-                    <button onClick={(s) => handleSongPlay(song)}>Play</button>
-                    <br />
-                  </div>
+                  <ListItem key={song.name} sx={{ backgroundColor: bgcolor }}>
+                    <ListItemText sx={{ color: "white" }}>
+                      {i + 1}. {song.name}{" "}
+                    </ListItemText>
+                    <IconButton onClick={(s) => handleSongPlay(song)}>
+                      <PlayArrowIcon sx={{ color: "white" }} />
+                    </IconButton>
+                  </ListItem>
                 );
-              })
-            : null}
+              })}
+            </List>
+          ) : null}
         </div>
       </div>
     );
   };
-  //   return topArtistData.map((artist, index) => {
-  //     return (
-  //       <div key={artist.name}>
-  //         <h2>
-  //           {index + 1}. {artist.name}
-  //         </h2>
-  //         <img
-  //           src={artist.images[0].url}
-  //           alt={artist.name}
-  //           height="200px"
-  //           width="200px"
-  //         />
-  //         <div>
-  //           Followers:{" "}
-  //           {Intl.NumberFormat("en-US").format(artist.followers.total)}
-  //         </div>
-  //         <br />
-  //       </div>
-  //     );
-  //   });
-  // };
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#333", margin: "-8px" }}>
       <br />
       {renderProfile()}
       <br />
       {spotifyToken ? (
         <div>
-          <SpotifyPlayer
-            token={spotifyToken}
-            styles={spotifyPlaybackStyle}
-            initialVolume={0.25}
-            layout="responsive"
-            showSaveIcon="true"
-            syncExternalDevice="true"
-            autoPlay="true"
-            hideAttribution="true"
-          />
+          <AppBar position="fixed" sx={{ top: "auto", bottom: 0 }}>
+            <SpotifyPlayer
+              token={spotifyToken}
+              styles={spotifyPlaybackStyle}
+              initialVolume={0.25}
+              layout="responsive"
+              showSaveIcon="true"
+              syncExternalDevice="true"
+              hideAttribution="true"
+            />
+          </AppBar>
+          <br />
           <br />
           {renderAlbumSearch()}
         </div>

@@ -45,7 +45,6 @@ export const getTokenFromUrl = () => {
 };
 
 export const spotifyStyle = {
-  margin: "1rem 1rem 0 0",
   border: "0",
   borderRadius: "20px",
   padding: "10px 3rem",
@@ -59,7 +58,7 @@ export const spotifyStyle = {
 };
 
 export const spotifyPlaybackStyle = {
-  bgColor: "#333",
+  bgColor: "black",
   color: "#fff",
   loaderColor: "#fff",
   sliderColor: "#1cb954",
@@ -67,4 +66,5 @@ export const spotifyPlaybackStyle = {
   trackArtistColor: "#ccc",
   trackNameColor: "#fff",
   trackNameFont: "Arial, Helvetica, sans-serif",
+  sliderHandleColor: "white",
 };
