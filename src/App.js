@@ -29,6 +29,7 @@ const spotify = new SpotifyWebApi();
 // Need ability to search for albums and display the results
 // Make search results clickable and onclick display tracklist with ability to play those songs
 // Improved search page's visuals
+// Playback transfers to webpage before song play
 
 // TO DO:
 // Need to add tier list creation/editing functionality
@@ -121,14 +122,18 @@ function App() {
         setAlbumTracklist(result.tracks.items);
         setSearchResults([album]);
 
-        // On clicking on an album, set current device as playback device. Only run once though if device has already been set
+        // On clicking on an album, set current device as playback device. Only runs once
         if (!currentDevice) {
           spotify.getMyDevices((err, result) => {
             if (err) {
               console.log(err);
             } else {
-              setCurrentDevice(result.devices[0].id);
-              let deviceIdObject = [result.devices[0].id];
+              let myAppID = result.devices.find(
+                (device) => device.name === "Spotify Web Player"
+              );
+
+              setCurrentDevice(myAppID.id);
+              let deviceIdObject = [myAppID.id];
               spotify.transferMyPlayback(deviceIdObject);
             }
           });
