@@ -28,6 +28,7 @@ const spotify = new SpotifyWebApi();
 // Added in app playback controls
 // Need ability to search for albums and display the results
 // Make search results clickable and onclick display tracklist with ability to play those songs
+// Improved search page's visuals
 
 // TO DO:
 // Need to add tier list creation/editing functionality
@@ -43,6 +44,7 @@ function App() {
   const [searchCriteria, setSearchCriteria] = useState("");
   const [searchResults, setSearchResults] = useState({});
   const [albumTracklist, setAlbumTracklist] = useState({});
+  const [currentDevice, setCurrentDevice] = useState("");
 
   useEffect(() => {
     // API call to get Authorization Token from Spotify
@@ -118,6 +120,19 @@ function App() {
       } else {
         setAlbumTracklist(result.tracks.items);
         setSearchResults([album]);
+
+        // On clicking on an album, set current device as playback device. Only run once though if device has already been set
+        if (!currentDevice) {
+          spotify.getMyDevices((err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              setCurrentDevice(result.devices[0].id);
+              let deviceIdObject = [result.devices[0].id];
+              spotify.transferMyPlayback(deviceIdObject);
+            }
+          });
+        }
       }
     });
   };
