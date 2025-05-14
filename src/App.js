@@ -11,8 +11,11 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  Grid,
+  InputAdornment,
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import {
   loginUrl,
@@ -30,6 +33,7 @@ const spotify = new SpotifyWebApi();
 // Make search results clickable and onclick display tracklist with ability to play those songs
 // Improved search page's visuals
 // Playback transfers to webpage before song play
+// Need to implement right half/left half layout with tier list and album search respectively
 
 // TO DO:
 // Need to add tier list creation/editing functionality
@@ -37,7 +41,6 @@ const spotify = new SpotifyWebApi();
 // Need to add ability to search for other user's tier lists and display them
 // Need to add ability for login to persist accross refreshses
 // Need to impove look of the non-logged in page
-// Need to implement right half/left half layout with tier list and album search respectively
 
 function App() {
   const [spotifyToken, setSpotifyToken] = useState("");
@@ -114,6 +117,22 @@ function App() {
     });
   };
 
+  let makeCurrentDeviceActive = () => {
+    spotify.getMyDevices((err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        let myAppID = result.devices.find(
+          (device) => device.name === "Spotify Web Player"
+        );
+
+        setCurrentDevice(myAppID.id);
+        let deviceIdObject = [myAppID.id];
+        spotify.transferMyPlayback(deviceIdObject);
+      }
+    });
+  };
+
   let handleAlbumClick = (album) => {
     spotify.getAlbum(album.id, (err, result) => {
       if (err) {
@@ -124,19 +143,7 @@ function App() {
 
         // On clicking on an album, set current device as playback device. Only runs once
         if (!currentDevice) {
-          spotify.getMyDevices((err, result) => {
-            if (err) {
-              console.log(err);
-            } else {
-              let myAppID = result.devices.find(
-                (device) => device.name === "Spotify Web Player"
-              );
-
-              setCurrentDevice(myAppID.id);
-              let deviceIdObject = [myAppID.id];
-              spotify.transferMyPlayback(deviceIdObject);
-            }
-          });
+          makeCurrentDeviceActive();
         }
       }
     });
@@ -150,10 +157,11 @@ function App() {
 
   // allows the user to search spotify for albums and displays those results, also allows those albums's tracklist to be shown and played
   let renderAlbumSearch = () => {
-    let albumListPadding = searchResults.length === 1 ? "0px" : "80px";
+    let albumListPadding = searchResults.length === 1 ? "0px" : "27px";
+    let trackListPadding = albumTracklist.length === 1 ? "0px" : "27px";
 
     return (
-      <div>
+      <div style={{ backgroundColor: "#333" }}>
         <form
           onSubmit={handleSubmitSearch}
           style={{ outline: "3px solid black", outlineOffset: "15px" }}
@@ -178,6 +186,14 @@ function App() {
               }}
             />
           </FormControl>
+          <IconButton
+            sx={{
+              marginTop: "10px",
+            }}
+            onClick={handleSubmitSearch}
+          >
+            <SearchIcon sx={{ color: "white" }} />
+          </IconButton>
         </form>
         <br />
         <div>
@@ -219,7 +235,11 @@ function App() {
           ) : null}
           {albumTracklist.length ? (
             <List
-              sx={{ width: "100%", paddingTop: "0px", paddingBottom: "80px" }}
+              sx={{
+                width: "100%",
+                paddingTop: "0px",
+                paddingBottom: trackListPadding,
+              }}
             >
               {albumTracklist.map((song, i) => {
                 let bgcolor = i % 2 === 0 ? "#333" : "#444";
@@ -241,8 +261,65 @@ function App() {
     );
   };
 
+  let renderTierList = () => {
+    const tierListData = [
+      { tierLetter: "S", color: "#FF7F7F" },
+      { tierLetter: "A", color: "#FFBF7F" },
+      { tierLetter: "B", color: "#FFDF7F" },
+      { tierLetter: "C", color: "#FFFF7F" },
+      { tierLetter: "D", color: "#BFFF7F" },
+    ];
+
+    return (
+      <Box sx={{ flexGrow: 1, p: 2, paddingTop: "12%" }}>
+        <Grid
+          container
+          sx={{
+            "--Grid-borderWidth": "3px",
+            borderTop: "var(--Grid-borderWidth) solid",
+            borderLeft: "var(--Grid-borderWidth) solid",
+            borderColor: "black",
+            "& > div": {
+              borderRight: "var(--Grid-borderWidth) solid",
+              borderBottom: "var(--Grid-borderWidth) solid",
+              borderColor: "black",
+            },
+          }}
+        >
+          {tierListData.map((row) => {
+            return (
+              <>
+                <Grid
+                  size={1}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-evenly"
+                  style={{ backgroundColor: row.color }}
+                  height="100px"
+                  width="5%"
+                >
+                  <h2>{row.tierLetter}</h2>
+                </Grid>
+                <Grid
+                  size={11}
+                  display="flex"
+                  alignItems="center"
+                  height="100px"
+                  width="95%"
+                  backgroundColor="#333"
+                >
+                  <div style={{ paddingLeft: "10px" }}>albums</div>
+                </Grid>
+              </>
+            );
+          })}
+        </Grid>
+      </Box>
+    );
+  };
+
   return (
-    <div style={{ backgroundColor: "#333", margin: "-8px" }}>
+    <div style={{ margin: "-8px" }}>
       <br />
       {renderProfile()}
       <br />
@@ -259,9 +336,21 @@ function App() {
               hideAttribution="true"
             />
           </AppBar>
-          <br />
-          <br />
-          {renderAlbumSearch()}
+          <div className="main">
+            <div style={{ width: "50%" }} className="left">
+              {renderTierList()}
+            </div>
+            <div
+              style={{
+                paddingTop: "31px",
+                width: "50%",
+                borderLeft: "3px solid black",
+              }}
+              className="right"
+            >
+              {renderAlbumSearch()}
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
