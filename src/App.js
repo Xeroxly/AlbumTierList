@@ -1,5 +1,14 @@
+import { useState, useEffect } from "react";
+
 import SpotifyWebApi from "spotify-web-api-js";
 import SpotifyPlayer from "react-spotify-web-playback";
+import {
+  loginUrl,
+  getTokenFromUrl,
+  spotifyStyle,
+  spotifyPlaybackStyle,
+} from "./spotify";
+
 import {
   AppBar,
   Avatar,
@@ -12,17 +21,11 @@ import {
   ListItemText,
   IconButton,
   Grid,
-  InputAdornment,
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState, useEffect } from "react";
-import {
-  loginUrl,
-  getTokenFromUrl,
-  spotifyStyle,
-  spotifyPlaybackStyle,
-} from "./spotify";
+
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const spotify = new SpotifyWebApi();
 
@@ -42,6 +45,57 @@ const spotify = new SpotifyWebApi();
 // Need to add ability for login to persist accross refreshses
 // Need to impove look of the non-logged in page
 
+let testData = [
+  {
+    letter: "S",
+    albums: [
+      {
+        id: "7j7lsExGJtBHLgDYzjclwk",
+        title: "All Things Must Pass (2014 Remaster)",
+        image:
+          "https://i.scdn.co/image/ab67616d0000b2736c6610322fc60bfb41481273",
+      },
+      {
+        id: "38xW9kksFyiS5sc0tU082f",
+        title: "Brainwashed",
+        image:
+          "https://i.scdn.co/image/ab67616d0000b273c1afb8febc06f971620d9861",
+      },
+    ],
+  },
+  {
+    letter: "A",
+    albums: [],
+  },
+  {
+    letter: "B",
+    albums: [
+      {
+        id: "7MD06W6wJm7J6jqkBszV22",
+        title: "Cloud Nine",
+        image:
+          "https://i.scdn.co/image/ab67616d0000b27375aeab61b79629d43ca8f42f",
+      },
+    ],
+  },
+  {
+    letter: "C",
+    albums: [],
+  },
+  {
+    letter: "D",
+    albums: [],
+  },
+];
+
+const tierListData = [
+  { tierLetter: "S", color: "#FF7F7F" },
+  { tierLetter: "A", color: "#FFBF7F" },
+  { tierLetter: "B", color: "#FFDF7F" },
+  { tierLetter: "C", color: "#FFFF7F" },
+  { tierLetter: "D", color: "#BFFF7F" },
+];
+
 function App() {
   const [spotifyToken, setSpotifyToken] = useState("");
   const [profileInfo, setProfileInfo] = useState({});
@@ -49,6 +103,7 @@ function App() {
   const [searchResults, setSearchResults] = useState({});
   const [albumTracklist, setAlbumTracklist] = useState({});
   const [currentDevice, setCurrentDevice] = useState("");
+  const [albumData, setAlbumData] = useState(testData);
 
   useEffect(() => {
     // API call to get Authorization Token from Spotify
@@ -262,16 +317,8 @@ function App() {
   };
 
   let renderTierList = () => {
-    const tierListData = [
-      { tierLetter: "S", color: "#FF7F7F" },
-      { tierLetter: "A", color: "#FFBF7F" },
-      { tierLetter: "B", color: "#FFDF7F" },
-      { tierLetter: "C", color: "#FFFF7F" },
-      { tierLetter: "D", color: "#BFFF7F" },
-    ];
-
     return (
-      <Box sx={{ flexGrow: 1, p: 2, paddingTop: "12%" }}>
+      <Box sx={{ flexGrow: 1, p: 2, paddingTop: "10%" }}>
         <Grid
           container
           sx={{
@@ -286,36 +333,139 @@ function App() {
             },
           }}
         >
-          {tierListData.map((row) => {
-            return (
-              <>
-                <Grid
-                  size={1}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-evenly"
-                  style={{ backgroundColor: row.color }}
-                  height="100px"
-                  width="5%"
-                >
-                  <h2>{row.tierLetter}</h2>
-                </Grid>
-                <Grid
-                  size={11}
-                  display="flex"
-                  alignItems="center"
-                  height="100px"
-                  width="95%"
-                  backgroundColor="#333"
-                >
-                  <div style={{ paddingLeft: "10px" }}>albums</div>
-                </Grid>
-              </>
-            );
-          })}
+          {tierListData.map((row) => (
+            <>
+              <Grid
+                size={1}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-evenly"
+                style={{ backgroundColor: row.color }}
+                height="105px"
+                width="5%"
+              >
+                <h3>{row.tierLetter}</h3>
+              </Grid>
+              <Droppable droppableId={row.tierLetter} type="group">
+                {(provided) => (
+                  <Grid
+                    size={11}
+                    display="flex"
+                    alignItems="center"
+                    height="105px"
+                    width="95%"
+                    paddingTop="4px"
+                    backgroundColor="#333"
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {albumData
+                      .find((tierData) => tierData.letter === row.tierLetter)
+                      .albums.map((album, index) => (
+                        <Draggable
+                          draggableId={album.id}
+                          key={album.id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              {...provided.dragHandleProps}
+                              {...provided.draggableProps}
+                              ref={provided.innerRef}
+                            >
+                              <img
+                                src={album.image}
+                                alt={album.id}
+                                height="100"
+                                width="100"
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                    {provided.placeholder}
+                  </Grid>
+                )}
+              </Droppable>
+            </>
+          ))}
         </Grid>
       </Box>
     );
+  };
+
+  let handleDragDrop = (results) => {
+    const { source, destination } = results;
+
+    // If album is dropped outside of a droppable area
+    if (!destination) {
+      return;
+    }
+
+    // If album is dropped back into exact same position
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    if (source.droppableId === destination.droppableId) {
+      let tierIndex = albumData.findIndex(
+        (tier) => tier.letter === destination.droppableId
+      );
+
+      let elementToUpdate = albumData[tierIndex];
+
+      let reorderedAlbums = albumData[tierIndex].albums;
+      const [removedAlbum] = reorderedAlbums.splice(source.index, 1);
+      reorderedAlbums.splice(destination.index, 0, removedAlbum);
+
+      let updatedAlbumData = albumData.map((data, index) =>
+        index === tierIndex
+          ? { ...elementToUpdate, albums: reorderedAlbums }
+          : data
+      );
+
+      return setAlbumData(updatedAlbumData);
+    } else {
+      let destinationTierIndex = albumData.findIndex(
+        (tier) => tier.letter === destination.droppableId
+      );
+
+      let sourceTierIndex = albumData.findIndex(
+        (tier) => tier.letter === source.droppableId
+      );
+
+      let destinationElementToUpdate = albumData[destinationTierIndex];
+      let sourceElementToUpdate = albumData[sourceTierIndex];
+
+      let reorderedDestinationAlbums = albumData[destinationTierIndex].albums;
+      let reorderedSourceAlbums = albumData[sourceTierIndex].albums;
+
+      const [removedAlbum] = reorderedSourceAlbums.splice(source.index, 1);
+      reorderedDestinationAlbums.splice(destination.index, 0, removedAlbum);
+
+      let updatedAlbumData = albumData.map((data, index) =>
+        index === destinationTierIndex
+          ? {
+              ...destinationElementToUpdate,
+              albums: reorderedDestinationAlbums,
+            }
+          : data
+      );
+
+      updatedAlbumData = updatedAlbumData.map((data, index) =>
+        index === sourceTierIndex
+          ? {
+              ...sourceElementToUpdate,
+              albums: reorderedSourceAlbums,
+            }
+          : data
+      );
+
+      return setAlbumData(updatedAlbumData);
+    }
   };
 
   return (
@@ -337,19 +487,21 @@ function App() {
             />
           </AppBar>
           <div className="main">
-            <div style={{ width: "50%" }} className="left">
-              {renderTierList()}
-            </div>
-            <div
-              style={{
-                paddingTop: "31px",
-                width: "50%",
-                borderLeft: "3px solid black",
-              }}
-              className="right"
-            >
-              {renderAlbumSearch()}
-            </div>
+            <DragDropContext onDragEnd={handleDragDrop}>
+              <div style={{ width: "50%" }} className="left">
+                {renderTierList()}
+              </div>
+              <div
+                style={{
+                  paddingTop: "31px",
+                  width: "50%",
+                  borderLeft: "3px solid black",
+                }}
+                className="right"
+              >
+                {renderAlbumSearch()}
+              </div>
+            </DragDropContext>
           </div>
         </div>
       ) : null}
