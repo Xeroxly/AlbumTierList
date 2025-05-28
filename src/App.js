@@ -37,31 +37,128 @@ const spotify = new SpotifyWebApi();
 // Improved search page's visuals
 // Playback transfers to webpage before song play
 // Need to implement right half/left half layout with tier list and album search respectively
+// Search Results are filtered based on current tier list to avoid duplicates
+// Need to add tier list creation/editing functionality
 
 // TO DO:
-// Need to add tier list creation/editing functionality
 // Need to add ability to save tier lists to Database
 // Need to add ability to search for other user's tier lists and display them
 // Need to add ability for login to persist accross refreshses
-// Need to impove look of the non-logged in page
+// Need to impove look of the non-logged in page (maybe add tutorial?)
+// Add abiity for other users to comment on people's tier lists
 
+// Populated Test Data
+// let testData = [
+//   {
+//     letter: "S",
+//     albums: [
+//       {
+//         id: "0ETFjACtuP2ADo6LFhL6HN",
+//         title: "Abbey Road (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273dc30583ba717007b00cceb25",
+//       },
+//       {
+//         id: "6QaVfG1pHYl1z15ZxkvVDW",
+//         title: "Sgt. Pepper's Lonely Hearts Club Band (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b27334ef8f7d06cf2fc2146f420a",
+//       },
+//       {
+//         id: "1klALx0u4AavZNEvC4LrTL",
+//         title: "The Beatles (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b2734ce8b4e42588bf18182a1ad2",
+//       },
+//       {
+//         id: "50o7kf2wLwVmOTVYJOTplm",
+//         title: "Rubber Soul (Remastered 2009)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273ed801e58a9ababdea6ac7ce4",
+//       },
+//       {
+//         id: "3PRoXYsngSwjEQWR5PsHWR",
+//         title: "Revolver (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b27328b8b9b46428896e6491e97a",
+//       },
+//     ],
+//   },
+//   {
+//     letter: "A",
+//     albums: [
+//       {
+//         id: "0jTGHV5xqHPvEcwL8f6YU5",
+//         title: "Let It Be (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b27384243a01af3c77b56fe01ab1",
+//       },
+//       {
+//         id: "2BtE7qm1qzM80p9vLSiXkj",
+//         title: "Magical Mystery Tour (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273692d9189b2bd75525893f0c1",
+//       },
+//     ],
+//   },
+//   {
+//     letter: "B",
+//     albums: [
+//       {
+//         id: "3KzAvEXcqJKBF97HrXwlgf",
+//         title: "Please Please Me (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273dbeec63ad914c973e75c24df",
+//       },
+//       {
+//         id: "0PT5m6hwPRrpBwIHVnvbFX",
+//         title: "Help! (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273e3e3b64cea45265469d4cafa",
+//       },
+//     ],
+//   },
+//   {
+//     letter: "C",
+//     albums: [
+//       {
+//         id: "6wCttLq0ADzkPgtRnUihLV",
+//         title: "A Hard Day's Night (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273e230f303815e82a86713eedd",
+//       },
+//       {
+//         id: "1vANZV20H5B4Fk6yf7Ot9a",
+//         title: "Beatles For Sale (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b27355612ece447bec5d62c68375",
+//       },
+//       {
+//         id: "1aYdiJk6XKeHWGO3FzHHTr",
+//         title: "With The Beatles (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273608a63ad5b18e99da94a3f73",
+//       },
+//     ],
+//   },
+//   {
+//     letter: "D",
+//     albums: [
+//       {
+//         id: "1gKZ5A1ndFqbcrWtW85cCy",
+//         title: "Yellow Submarine (Remastered)",
+//         image:
+//           "https://i.scdn.co/image/ab67616d0000b273d283808926ad3d2220e63c1c",
+//       },
+//     ],
+//   },
+// ];
+
+// Empty TestData
 let testData = [
   {
     letter: "S",
-    albums: [
-      {
-        id: "7j7lsExGJtBHLgDYzjclwk",
-        title: "All Things Must Pass (2014 Remaster)",
-        image:
-          "https://i.scdn.co/image/ab67616d0000b2736c6610322fc60bfb41481273",
-      },
-      {
-        id: "38xW9kksFyiS5sc0tU082f",
-        title: "Brainwashed",
-        image:
-          "https://i.scdn.co/image/ab67616d0000b273c1afb8febc06f971620d9861",
-      },
-    ],
+    albums: [],
   },
   {
     letter: "A",
@@ -69,14 +166,7 @@ let testData = [
   },
   {
     letter: "B",
-    albums: [
-      {
-        id: "7MD06W6wJm7J6jqkBszV22",
-        title: "Cloud Nine",
-        image:
-          "https://i.scdn.co/image/ab67616d0000b27375aeab61b79629d43ca8f42f",
-      },
-    ],
+    albums: [],
   },
   {
     letter: "C",
@@ -166,7 +256,28 @@ function App() {
       if (err) {
         console.log(err);
       } else {
-        setSearchResults(result.albums.items);
+        let initialResults = result.albums.items;
+
+        // Filters search results to not include albums already in your tier list
+        let albumDataIDs = [];
+
+        albumData.forEach((tier) => {
+          tier.albums.forEach((album) => {
+            albumDataIDs.push(album.id);
+          });
+        });
+
+        let alreadyHaveAlbum = (album) => {
+          if (albumDataIDs.includes(album.id)) {
+            return false;
+          } else {
+            return true;
+          }
+        };
+
+        let filteredResults = initialResults.filter(alreadyHaveAlbum);
+
+        setSearchResults(filteredResults);
         setAlbumTracklist({});
       }
     });
@@ -217,105 +328,142 @@ function App() {
 
     return (
       <div style={{ backgroundColor: "#333" }}>
-        <form
-          onSubmit={handleSubmitSearch}
-          style={{ outline: "3px solid black", outlineOffset: "15px" }}
-        >
-          <FormControl
-            sx={{
-              width: "50%",
-              paddingLeft: "25%",
-              paddingTop: "15px",
-            }}
-          >
-            <input
-              type="text"
-              value={searchCriteria}
-              onChange={(e) => setSearchCriteria(e.target.value)}
-              placeholder="Search for an Album"
-              style={{
-                borderRadius: "20px",
-                paddingLeft: "10px",
-                border: "2px solid black",
-                height: "25px",
-              }}
-            />
-          </FormControl>
-          <IconButton
-            sx={{
-              marginTop: "10px",
-            }}
-            onClick={handleSubmitSearch}
-          >
-            <SearchIcon sx={{ color: "white" }} />
-          </IconButton>
-        </form>
-        <br />
-        <div>
-          {searchResults.length ? (
-            <List
-              sx={{
-                width: "100%",
-                paddingTop: "0px",
-                paddingBottom: albumListPadding,
-              }}
-            >
-              {searchResults.map((album, i) => {
-                let bgcolor = i % 2 === 0 ? "#444" : "#333";
-                return (
-                  <ListItem key={album.id} style={{ backgroundColor: bgcolor }}>
-                    <input
-                      type="image"
-                      alt={album.name}
-                      src={album.images[0].url}
-                      height={"100px"}
-                      width={"100px"}
-                      onClick={(a) => handleAlbumClick(album)}
-                    />
-                    {"  "}
-                    <ListItemText
-                      style={{
-                        display: "inline",
-                        color: "white",
-                        paddingLeft: "10px",
-                      }}
-                    >
-                      {album.name}
-                    </ListItemText>
-                    <br />
-                  </ListItem>
-                );
-              })}
-            </List>
-          ) : null}
-          {albumTracklist.length ? (
-            <List
-              sx={{
-                width: "100%",
-                paddingTop: "0px",
-                paddingBottom: trackListPadding,
-              }}
-            >
-              {albumTracklist.map((song, i) => {
-                let bgcolor = i % 2 === 0 ? "#333" : "#444";
-                return (
-                  <ListItem key={song.name} sx={{ backgroundColor: bgcolor }}>
-                    <ListItemText sx={{ color: "white" }}>
-                      {i + 1}. {song.name}{" "}
-                    </ListItemText>
-                    <IconButton onClick={(s) => handleSongPlay(song)}>
-                      <PlayArrowIcon sx={{ color: "white" }} />
-                    </IconButton>
-                  </ListItem>
-                );
-              })}
-            </List>
-          ) : null}
-        </div>
+        <Droppable droppableId={"searchResults"} type="group">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              <form
+                onSubmit={handleSubmitSearch}
+                style={{ outline: "3px solid black", outlineOffset: "15px" }}
+              >
+                <FormControl
+                  sx={{
+                    width: "50%",
+                    paddingLeft: "25%",
+                    paddingTop: "15px",
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={searchCriteria}
+                    onChange={(e) => setSearchCriteria(e.target.value)}
+                    placeholder="Search for an Album"
+                    style={{
+                      borderRadius: "20px",
+                      paddingLeft: "10px",
+                      border: "2px solid black",
+                      height: "25px",
+                    }}
+                  />
+                </FormControl>
+                <IconButton
+                  sx={{
+                    marginTop: "10px",
+                  }}
+                  onClick={handleSubmitSearch}
+                >
+                  <SearchIcon sx={{ color: "white" }} />
+                </IconButton>
+              </form>
+              <br />
+              <div>
+                {searchResults.length ? (
+                  <List
+                    sx={{
+                      width: "100%",
+                      paddingTop: "0px",
+                      paddingBottom: albumListPadding,
+                    }}
+                  >
+                    {searchResults.map((album, i) => {
+                      let bgcolor = i % 2 === 0 ? "#444" : "#333";
+                      return (
+                        <ListItem
+                          key={album.id}
+                          style={{ backgroundColor: bgcolor }}
+                        >
+                          <Draggable
+                            draggableId={album.id}
+                            key={album.id}
+                            index={i}
+                          >
+                            {(provided) => (
+                              <div
+                                {...provided.dragHandleProps}
+                                {...provided.draggableProps}
+                                ref={provided.innerRef}
+                              >
+                                <img
+                                  alt={album.name}
+                                  src={album.images[0].url}
+                                  height={"100px"}
+                                  width={"100px"}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+
+                          <button
+                            onDoubleClick={(a) => handleAlbumClick(album)}
+                            style={{
+                              backgroundColor: bgcolor,
+                              border: "none",
+                              paddingLeft: "15px",
+                              cursor: "pointer",
+                              paddingBottom: "15px",
+                              paddingTop: "0px",
+                            }}
+                          >
+                            <ListItemText
+                              style={{
+                                display: "inline",
+                                color: "white",
+                                paddingLeft: "10px",
+                              }}
+                            >
+                              {album.name}
+                            </ListItemText>
+                          </button>
+                          <br />
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                ) : null}
+                {albumTracklist.length ? (
+                  <List
+                    sx={{
+                      width: "100%",
+                      paddingTop: "0px",
+                      paddingBottom: trackListPadding,
+                    }}
+                  >
+                    {albumTracklist.map((song, i) => {
+                      let bgcolor = i % 2 === 0 ? "#333" : "#444";
+                      return (
+                        <ListItem
+                          key={song.name}
+                          sx={{ backgroundColor: bgcolor }}
+                        >
+                          <ListItemText sx={{ color: "white" }}>
+                            {i + 1}. {song.name}{" "}
+                          </ListItemText>
+                          <IconButton onClick={(s) => handleSongPlay(song)}>
+                            <PlayArrowIcon sx={{ color: "white" }} />
+                          </IconButton>
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </Droppable>
       </div>
     );
   };
 
+  // Displays a tier list of albums which can be edited using drag and drop functionality
   let renderTierList = () => {
     return (
       <Box sx={{ flexGrow: 1, p: 2, paddingTop: "10%" }}>
@@ -402,6 +550,14 @@ function App() {
       return;
     }
 
+    // If album is dragged and dropped inside the search results, not neccessarily in the same position
+    if (
+      source.droppableId === "searchResults" &&
+      destination.droppableId === "searchResults"
+    ) {
+      return;
+    }
+
     // If album is dropped back into exact same position
     if (
       source.droppableId === destination.droppableId &&
@@ -410,6 +566,65 @@ function App() {
       return;
     }
 
+    // If album is dragged from search results into tier list
+    if (
+      source.droppableId === "searchResults" &&
+      destination.droppableId.length === 1
+    ) {
+      let updatedSearch = searchResults;
+
+      const [removedAlbum] = updatedSearch.splice(source.index, 1);
+
+      let newTierListAlbum = {
+        id: removedAlbum.id,
+        title: removedAlbum.name,
+        image: removedAlbum.images[0].url,
+      };
+
+      setSearchResults(updatedSearch);
+
+      let tierIndex = albumData.findIndex(
+        (tier) => tier.letter === destination.droppableId
+      );
+
+      let elementToUpdate = albumData[tierIndex];
+
+      let reorderedAlbums = albumData[tierIndex].albums;
+      reorderedAlbums.splice(destination.index, 0, newTierListAlbum);
+
+      let updatedAlbumData = albumData.map((data, index) =>
+        index === tierIndex
+          ? { ...elementToUpdate, albums: reorderedAlbums }
+          : data
+      );
+
+      return setAlbumData(updatedAlbumData);
+    }
+
+    // If album is dragged from tier list into search results
+    if (
+      destination.droppableId === "searchResults" &&
+      source.droppableId.length === 1
+    ) {
+      let tierIndex = albumData.findIndex(
+        (tier) => tier.letter === source.droppableId
+      );
+
+      let elementToUpdate = albumData[tierIndex];
+      let reorderedAlbums = albumData[tierIndex].albums;
+
+      reorderedAlbums.splice(source.index, 1);
+
+      let updatedAlbumData = albumData.map((data, index) =>
+        index === tierIndex
+          ? { ...elementToUpdate, albums: reorderedAlbums }
+          : data
+      );
+
+      return setAlbumData(updatedAlbumData);
+    }
+
+    // If album is moved within same tier on the tier list
     if (source.droppableId === destination.droppableId) {
       let tierIndex = albumData.findIndex(
         (tier) => tier.letter === destination.droppableId
@@ -428,7 +643,9 @@ function App() {
       );
 
       return setAlbumData(updatedAlbumData);
-    } else {
+    }
+    // If album is moved between tiers on the tier list
+    else {
       let destinationTierIndex = albumData.findIndex(
         (tier) => tier.letter === destination.droppableId
       );
@@ -488,13 +705,13 @@ function App() {
           </AppBar>
           <div className="main">
             <DragDropContext onDragEnd={handleDragDrop}>
-              <div style={{ width: "50%" }} className="left">
+              <div style={{ width: "60%" }} className="left">
                 {renderTierList()}
               </div>
               <div
                 style={{
                   paddingTop: "31px",
-                  width: "50%",
+                  width: "40%",
                   borderLeft: "3px solid black",
                 }}
                 className="right"
