@@ -39,15 +39,16 @@ const spotify = new SpotifyWebApi();
 // Need to implement right half/left half layout with tier list and album search respectively
 // Search Results are filtered based on current tier list to avoid duplicates
 // Need to add tier list creation/editing functionality
+// Add ability to click on tier list albums and have them render tracklist
 
 // TO DO:
 // Need to add ability to save tier lists to Database
 // Need to add ability to search for other user's tier lists and display them
 // Need to add ability for login to persist accross refreshses
 // Need to impove look of the non-logged in page (maybe add tutorial?)
-// Add abiity for other users to comment on people's tier lists
+// Add abiity for other users to comment on people's tier list
 
-// Populated Test Data
+// Populated Test Data (My Beatles Tier List)
 // let testData = [
 //   {
 //     letter: "S",
@@ -194,6 +195,7 @@ function App() {
   const [albumTracklist, setAlbumTracklist] = useState({});
   const [currentDevice, setCurrentDevice] = useState("");
   const [albumData, setAlbumData] = useState(testData);
+  const [albumIDs, setAlbumIDs] = useState([]);
 
   useEffect(() => {
     // API call to get Authorization Token from Spotify
@@ -207,7 +209,17 @@ function App() {
         setProfileInfo(user);
       });
     }
-  }, []);
+
+    let albumDataIDs = [];
+
+    albumData.forEach((tier) => {
+      tier.albums.forEach((album) => {
+        albumDataIDs.push(album.id);
+      });
+    });
+
+    setAlbumIDs(albumDataIDs);
+  }, [albumData]);
 
   // Renders info from the currently logged in account
   let renderProfile = () => {
@@ -267,6 +279,8 @@ function App() {
           });
         });
 
+        setAlbumIDs(albumDataIDs);
+
         let alreadyHaveAlbum = (album) => {
           if (albumDataIDs.includes(album.id)) {
             return false;
@@ -305,7 +319,7 @@ function App() {
         console.log(err);
       } else {
         setAlbumTracklist(result.tracks.items);
-        setSearchResults([album]);
+        setSearchResults([result]);
 
         // On clicking on an album, set current device as playback device. Only runs once
         if (!currentDevice) {
@@ -376,43 +390,24 @@ function App() {
                   >
                     {searchResults.map((album, i) => {
                       let bgcolor = i % 2 === 0 ? "#444" : "#333";
-                      return (
-                        <ListItem
-                          key={album.id}
-                          style={{ backgroundColor: bgcolor }}
-                        >
-                          <Draggable
-                            draggableId={album.id}
-                            key={album.id}
-                            index={i}
-                          >
-                            {(provided) => (
-                              <div
-                                {...provided.dragHandleProps}
-                                {...provided.draggableProps}
-                                ref={provided.innerRef}
-                              >
-                                <img
-                                  alt={album.name}
-                                  src={album.images[0].url}
-                                  height={"100px"}
-                                  width={"100px"}
-                                />
-                              </div>
-                            )}
-                          </Draggable>
 
-                          <button
-                            onDoubleClick={(a) => handleAlbumClick(album)}
-                            style={{
-                              backgroundColor: bgcolor,
-                              border: "none",
-                              paddingLeft: "15px",
-                              cursor: "pointer",
-                              paddingBottom: "15px",
-                              paddingTop: "0px",
-                            }}
+                      // When displaying the tracklist of an album that's already in your tier list, eliminate the double draggable
+                      if (
+                        searchResults.length === 1 &&
+                        albumTracklist.length &&
+                        albumIDs.includes(searchResults[0].id)
+                      ) {
+                        return (
+                          <ListItem
+                            key={album.id}
+                            style={{ backgroundColor: bgcolor }}
                           >
+                            <img
+                              alt={album.name}
+                              src={album.images[0].url}
+                              height={"100px"}
+                              width={"100px"}
+                            />
                             <ListItemText
                               style={{
                                 display: "inline",
@@ -422,10 +417,60 @@ function App() {
                             >
                               {album.name}
                             </ListItemText>
-                          </button>
-                          <br />
-                        </ListItem>
-                      );
+                          </ListItem>
+                        );
+                      } else {
+                        return (
+                          <ListItem
+                            key={album.id}
+                            style={{ backgroundColor: bgcolor }}
+                          >
+                            <Draggable
+                              draggableId={album.id}
+                              key={album.id}
+                              index={i}
+                            >
+                              {(provided) => (
+                                <div
+                                  {...provided.dragHandleProps}
+                                  {...provided.draggableProps}
+                                  ref={provided.innerRef}
+                                >
+                                  <img
+                                    alt={album.name}
+                                    src={album.images[0].url}
+                                    height={"100px"}
+                                    width={"100px"}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+
+                            <button
+                              onDoubleClick={(a) => handleAlbumClick(album)}
+                              style={{
+                                backgroundColor: bgcolor,
+                                border: "none",
+                                paddingLeft: "15px",
+                                cursor: "pointer",
+                                paddingBottom: "15px",
+                                paddingTop: "0px",
+                              }}
+                            >
+                              <ListItemText
+                                style={{
+                                  display: "inline",
+                                  color: "white",
+                                  paddingLeft: "10px",
+                                }}
+                              >
+                                {album.name}
+                              </ListItemText>
+                            </button>
+                            <br />
+                          </ListItem>
+                        );
+                      }
                     })}
                   </List>
                 ) : null}
@@ -517,6 +562,7 @@ function App() {
                         >
                           {(provided) => (
                             <div
+                              onDoubleClick={(a) => handleAlbumClick(album)}
                               {...provided.dragHandleProps}
                               {...provided.draggableProps}
                               ref={provided.innerRef}
@@ -582,6 +628,11 @@ function App() {
       };
 
       setSearchResults(updatedSearch);
+
+      // Accounts for adding an album to tier list while looking at it's tracklist
+      if (albumTracklist.length) {
+        setSearchResults([removedAlbum]);
+      }
 
       let tierIndex = albumData.findIndex(
         (tier) => tier.letter === destination.droppableId
@@ -696,7 +747,7 @@ function App() {
             <SpotifyPlayer
               token={spotifyToken}
               styles={spotifyPlaybackStyle}
-              initialVolume={0.25}
+              initialVolume={0.5}
               layout="responsive"
               showSaveIcon="true"
               syncExternalDevice="true"
