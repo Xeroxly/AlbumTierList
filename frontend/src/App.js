@@ -22,145 +22,18 @@ import {
   IconButton,
   Grid,
 } from "@mui/material";
+
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SearchIcon from "@mui/icons-material/Search";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import axios from "axios";
 
 const spotify = new SpotifyWebApi();
-
-// DONE:
-// Added Spotify Authentication
-// Added in app playback controls
-// Need ability to search for albums and display the results
-// Make search results clickable and onclick display tracklist with ability to play those songs
-// Improved search page's visuals
-// Playback transfers to webpage before song play
-// Need to implement right half/left half layout with tier list and album search respectively
-// Search Results are filtered based on current tier list to avoid duplicates
-// Need to add tier list creation/editing functionality
-// Add ability to click on tier list albums and have them render tracklist
-
-// TO DO:
-// Requires Database:
-//    Need to add ability to save tier lists to Database
-//    Need to add ability to search for other user's tier lists and display them
-//    Add abiity for other users to comment on people's tier list
-
-// Need to add ability for login to persist accross refreshses
-// Need to impove look of the non-logged in page (maybe add tutorial?)
-
-// Populated Test Data (My Beatles Tier List)
-// let testData = {
-//   title: "Trevor's Beatles Tier List",
-//   data: [
-//     {
-//       letter: "S",
-//       albums: [
-//         {
-//           id: "0ETFjACtuP2ADo6LFhL6HN",
-//           title: "Abbey Road (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273dc30583ba717007b00cceb25",
-//         },
-//         {
-//           id: "6QaVfG1pHYl1z15ZxkvVDW",
-//           title: "Sgt. Pepper's Lonely Hearts Club Band (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b27334ef8f7d06cf2fc2146f420a",
-//         },
-//         {
-//           id: "1klALx0u4AavZNEvC4LrTL",
-//           title: "The Beatles (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b2734ce8b4e42588bf18182a1ad2",
-//         },
-//         {
-//           id: "50o7kf2wLwVmOTVYJOTplm",
-//           title: "Rubber Soul (Remastered 2009)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273ed801e58a9ababdea6ac7ce4",
-//         },
-//         {
-//           id: "3PRoXYsngSwjEQWR5PsHWR",
-//           title: "Revolver (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b27328b8b9b46428896e6491e97a",
-//         },
-//       ],
-//     },
-//     {
-//       letter: "A",
-//       albums: [
-//         {
-//           id: "0jTGHV5xqHPvEcwL8f6YU5",
-//           title: "Let It Be (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b27384243a01af3c77b56fe01ab1",
-//         },
-//         {
-//           id: "2BtE7qm1qzM80p9vLSiXkj",
-//           title: "Magical Mystery Tour (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273692d9189b2bd75525893f0c1",
-//         },
-//       ],
-//     },
-//     {
-//       letter: "B",
-//       albums: [
-//         {
-//           id: "3KzAvEXcqJKBF97HrXwlgf",
-//           title: "Please Please Me (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273dbeec63ad914c973e75c24df",
-//         },
-//         {
-//           id: "0PT5m6hwPRrpBwIHVnvbFX",
-//           title: "Help! (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273e3e3b64cea45265469d4cafa",
-//         },
-//       ],
-//     },
-//     {
-//       letter: "C",
-//       albums: [
-//         {
-//           id: "6wCttLq0ADzkPgtRnUihLV",
-//           title: "A Hard Day's Night (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273e230f303815e82a86713eedd",
-//         },
-//         {
-//           id: "1vANZV20H5B4Fk6yf7Ot9a",
-//           title: "Beatles For Sale (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b27355612ece447bec5d62c68375",
-//         },
-//         {
-//           id: "1aYdiJk6XKeHWGO3FzHHTr",
-//           title: "With The Beatles (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273608a63ad5b18e99da94a3f73",
-//         },
-//       ],
-//     },
-//     {
-//       letter: "D",
-//       albums: [
-//         {
-//           id: "1gKZ5A1ndFqbcrWtW85cCy",
-//           title: "Yellow Submarine (Remastered)",
-//           image:
-//             "https://i.scdn.co/image/ab67616d0000b273d283808926ad3d2220e63c1c",
-//         },
-//       ],
-//     },
-//   ],
-// };
 
 // Empty TestData
 let blankData = {
@@ -206,6 +79,8 @@ function App() {
   const [currentDevice, setCurrentDevice] = useState("");
   const [albumData, setAlbumData] = useState(blankData);
   const [albumIDs, setAlbumIDs] = useState([]);
+  const [editTitle, setEditTitle] = useState(false);
+  const [editTitleValue, setEditTitleValue] = useState("");
 
   useEffect(() => {
     // API call to get Authorization Token from Spotify
@@ -241,6 +116,7 @@ function App() {
 
       if (response.status === 200) {
         setAlbumData(response.data);
+        setEditTitleValue(response.data.title);
       }
     }
 
@@ -538,15 +414,71 @@ function App() {
   let renderTierList = () => {
     return (
       <Box sx={{ flexGrow: 1, p: 2, paddingTop: "3%" }}>
-        <h1
-          style={{
-            textDecoration: "underline",
-            fontWeight: "bold",
-            textAlign: "center",
-          }}
-        >
-          {albumData.title}
-        </h1>
+        {editTitle ? (
+          <h1>
+            <input
+              type="text"
+              value={editTitleValue}
+              onChange={(e) => setEditTitleValue(e.target.value)}
+              style={{
+                borderRadius: "20px",
+                border: "2px solid black",
+                height: "35px",
+                marginLeft: "17%",
+                width: "50%",
+                paddingLeft: "10px",
+                marginTop: "17px",
+              }}
+            />
+            <IconButton
+              onClick={() => {
+                async function updateData(newData) {
+                  const response = await axios.put(
+                    "http://localhost:5000/tierLists/" + albumData._id,
+                    newData
+                  );
+
+                  if (response.status === 200) {
+                    setAlbumData(newData);
+                    setEditTitle(false);
+                  }
+                }
+                let newData = albumData;
+                newData.title = editTitleValue;
+                updateData(newData);
+              }}
+            >
+              <SaveIcon sx={{ color: "black", paddingTop: "5px" }} />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                setEditTitle(false);
+                setEditTitleValue(albumData.title);
+              }}
+            >
+              <CancelIcon sx={{ color: "black", paddingTop: "5px" }} />
+            </IconButton>
+          </h1>
+        ) : (
+          <h1
+            style={{
+              textDecoration: "underline",
+              fontWeight: "bold",
+              textAlign: "center",
+              marginTop: "35px",
+            }}
+          >
+            {albumData.title}
+            <IconButton
+              onClick={() => {
+                setEditTitle(true);
+              }}
+            >
+              <EditIcon sx={{ color: "black", paddingBottom: "5px" }} />
+            </IconButton>
+          </h1>
+        )}
+
         <Grid
           container
           sx={{
